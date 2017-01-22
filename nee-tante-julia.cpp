@@ -44,9 +44,9 @@ inline int calc_julia_pixel(double x, double y, const double cre, const double c
 	return it;
 }
 
-void julia(char *const rgb_out, const int w, const int h, const double re, const double im, const int mit)
+void julia(int *const pixels, char *const rgb_out, const int w, const int h, const double re, const double im, const int mit)
 {
-	int *const pixels = (int *)malloc(w * h * 3 * sizeof(int)), *p = pixels;
+	int *p = pixels;
 
 	int mr = 0, mg = 0, mb = 0;
 	for(int y=0; y<h; y++)
@@ -91,17 +91,6 @@ void julia(char *const rgb_out, const int w, const int h, const double re, const
 			*out++ = 255;
 		}
 	}
-
-	free(pixels);
-}
-
-XImage *create_ximage(Display *display, Visual *visual, int width, int height, double re, double im, const int mit)
-{
-	char *image32 = (char *)malloc(width * height * 4);
-
-	julia(image32, width, height, re, im, mit);
-
-	return XCreateImage(display, visual, 24, ZPixmap, 0, image32, width, height, 32, 0);
 }
 
 int x11_err_handler(Display *pd, XErrorEvent *pxev)
@@ -163,6 +152,10 @@ int main(int argc, char **argv)
 
 	XSetErrorHandler(x11_err_handler);
 
+	int *pixels = (int *)malloc(width * height * 3 * sizeof(int));
+	char *image32 = (char *)malloc(width * height * 4);
+	XImage *ximage = XCreateImage(display, visual, 24, ZPixmap, 0, image32, width, height, 32, 0);
+
 	for(;;)
 	{
 		double re = drand48() * 4.0 - 2.0;
@@ -184,9 +177,8 @@ int main(int argc, char **argv)
 			double cur_re = pre + add_re * fraction_passed;
 			double cur_im = pim + add_im * fraction_passed;
 
-			XImage *ximage = create_ximage(display, visual, width, height, cur_re, cur_im, int(use_it));
+			julia(pixels, image32, width, height, cur_re, cur_im, use_it);
 			XPutImage(display, window, gc, ximage, 0, 0, 0, 0, width, height);
-			XDestroyImage(ximage);
 
 			frames++;
 			double r_time_passed = now_ts - start_ts;
@@ -194,13 +186,17 @@ int main(int argc, char **argv)
 
 			use_it = fps / target_fps * max_it;
 
-			if (fps > target_fps)
-				usleep(1000);
+			if (use_it < 1)
+				use_it = 1;
+			else if (use_it > 100)
+				use_it = 100;
 		}
 
 		pre = re;
 		pim = im;
 	}
+
+	XDestroyImage(ximage);
 
 	return 0;
 }
