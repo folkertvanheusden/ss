@@ -1,5 +1,5 @@
-# (C) 2017 by folkert van heusden
-# released under AGPL v3.0
+# (C) 2017-2023 by folkert van heusden
+# released in the public domain
 
 VERSION=0.3
 

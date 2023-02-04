@@ -1,5 +1,5 @@
-// (C) 2017 by folkert van heusden
-// released under AGPL v3.0
+// (C) 2017-2023 by folkert van heusden
+// released in the public domain
 
 #include <stdint.h>
 #include <stdio.h>
@@ -62,8 +62,7 @@ int main(int argc, char **argv)
 	char fontName[128];
 	Font f;
 
-	printf("bifurcation is (C) 2017 by Folkert van Heusden\n");
-	printf("Released under AGPL v3.0\n");
+	printf("bifurcation is (C) 2017-2023 by Folkert van Heusden\n");
 
 	if (e) {
 		window = strtol(e, NULL, 16);
